@@ -12,9 +12,9 @@ struct Node {
 #define NUMBER_OF_SEMAPHORES 2
 
 //LinkedList manipulation procedures
-void AddToEndOfList(LinkedList A, int val);
-void DeleteFirstElement(LinkedList A);
-int FirstElementVal(LinkedList A);
+void AddToEndOfList(struct Node A, int val);
+void DeleteFirstElement(struct Node A);
+int FirstElementVal(struct Node A);
 
 void semaphore_wait();
 void semaphore_signal();
@@ -32,7 +32,7 @@ int main() {
 	semaphore_init_values
 }
 
-void AddToEndOfList(LinkedList A, int val) {
+void AddToEndOfList(struct Node A, int val) {
 
 	struct Node *temp;
 	
@@ -46,4 +46,20 @@ void AddToEndOfList(LinkedList A, int val) {
 	else {
 		struct Node trav = shared_variable_struct->list;
 
-		while (trav->next !=
+		while (trav->next != NULL) {
+			trav = trav->next;
+		}
+
+		trav->next = temp;
+	}
+}
+
+void DeleteFirstElement(struct Node A) {
+	if (A != NULL) {
+		struct Node *newHead = A->next;
+	}
+}
+
+int FirstElementVal(struct Node A) {
+	return A->data;
+}
