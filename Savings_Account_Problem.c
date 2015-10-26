@@ -117,7 +117,36 @@ void deposit(int deposit_amount) {
 }
 
 void withdraw(int withdraw_amount) {
+	printf("***PID: %d: I am a WITHDRAW! \n", getpid());
 
+	//Get the semaphores and shared memory
+	int semid = get_semid((key_t)SEMAPHORE_KEY);
+	int shmid = get_shmid((key_t)SEMAPHORE_KEY);
+
+	printf("--- PID: %d: E: Waiting on Mutex.\n", getpid());
+	semaphore_wait(semid, SEMAPHORE_MUTEX);
+	printf("--- PID: %d: E: Passed Mutex.\n", getpid());
+
+	if (shared_variable->wcount == 0 && shared_variable->balance > withdraw_amount) {
+		shared_variable->balance = balance - withdraw_amount;
+		semaphore_signal(semid, SEMAPHORE_MUTEX);
+	}
+	else {
+		shared_variable->wcount	= shared_variable->wcount + 1;
+		AddToEndOfList(shared_variable->list, 0 - withdraw_amount);
+		semaphore_signal(semid, SEMAPHORE_MUTEX);
+		semaphore_wait(semid, SEMAPHORE_wlist);
+		shared_variable->balance = shared_variable->balance	- FirstElementVal(shared_variable->list);
+		DeleteFirstElement(shared_variable->list);
+		shared_variable->wcount = shared_variable->wcount - 1;
+
+		if (shared_variable->wcount > 1 && (FirstElementVal(shared_variable->list) < shared_variable->balance)) {
+			semaphore_signal(semid, SEMAPHORE_wlist);
+		}
+		else {
+			semaphore_signal(SEMAPHORE_MUTEX);
+		}
+	}
 }
 
 void AddToEndOfList(struct Node A, int val) {
