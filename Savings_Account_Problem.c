@@ -38,7 +38,7 @@ struct shared_variable_struct {
 void fork_process(int deposit_or_withdraw);
 
 //LinkedList manipulation procedures
-void AddToEndOfList(struct Node A, int val);
+void AddToEndOfList(struct Node *A, int val);
 void DeleteFirstElement(struct Node A);
 int FirstElementVal(struct Node A);
 
@@ -139,7 +139,8 @@ void withdraw(int withdraw_amount) {
 	}
 	else {
 		shared_variable->wcount	= shared_variable->wcount + 1;
-		AddToEndOfList(shared_variable->list, 0 - withdraw_amount);
+
+		AddToEndOfList(&(shared_variable->list), 0 - withdraw_amount);
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 		semaphore_wait(semid, SEMAPHORE_wlist);
 		shared_variable->balance = shared_variable->balance	- FirstElementVal(shared_variable->list);
@@ -182,26 +183,16 @@ void fork_process(int deposit_or_withdraw) {
 	}
 }
 
-void AddToEndOfList(struct Node A, int val) {
+void AddToEndOfList(struct Node *A, int val) {
 
-	struct Node *temp;
-	
-	temp = (struct Node *) malloc (sizeof(struct Node));
-	temp -> Data = val;
-
-	if (shared_variable_struct->list == NULL) {
-		shared_variable_struct->list = temp;
-		shared_variable_struct->list = NULL;
+	struct Node *current = A;
+	while (current->next != NULL) {
+		current = current ->next;
 	}
-	else {
-		struct Node trav = shared_variable_struct->list;
 
-		while (trav->next != NULL) {
-			trav = trav->next;
-		}
-
-		trav->next = temp;
-	}
+	current->next = malloc(sizeof(struct Node));
+	current->next->data = val;
+	current->next->next = NULL;
 }
 
 void DeleteFirstElement(struct Node A) {
