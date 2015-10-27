@@ -149,22 +149,15 @@ void main(int argc, char *argv[]) {
 	//set initial values of shared memory
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
-	shared_variable->list = NULL;
 
 	int i = 5; 
 	char *number; 
 
 	//check_linkedlist();
-	//fork_process(WITHDRAW, 700);
-	//stall();
+	fork_process(WITHDRAW, 700);
+	stall();
 	fork_process(DEPOSIT, 500);
-	stall();
-	fork_process(DEPOSIT, 100);
-	stall();
-	fork_process(DEPOSIT, 300);
-	stall();
-	fork_process(DEPOSIT, 200);
-	stall();
+
 	
 
 
@@ -214,7 +207,7 @@ void deposit(int deposit_amount) {
 	debug_print_shared(shared_variable);
 
 	//no withdraws at this time
-	if (shared_variable->wcount	= 0) {
+	if (shared_variable->wcount	= 1) {
 		printf("---PID: %d: D: Signaling MUTEX. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
