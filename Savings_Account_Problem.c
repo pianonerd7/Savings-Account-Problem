@@ -42,6 +42,8 @@ void AddToEndOfList(struct Node *A, int val);
 void DeleteFirstElement(struct Node *A);
 int FirstElementVal(struct Node *A);
 
+void stall();
+
 void semaphore_wait();
 void semaphore_signal();
 int create_semaphore(int value);
@@ -104,6 +106,14 @@ void check_linkedlist() {
 
 	printf("end\n");
 }
+
+void stall() {
+	int i;
+	for(i = 0; i < 100000; i++) {
+		;
+	}
+}
+
 //"-, 2, 0", "4, 0"
 void main(int argc, char *argv[]) {
 
@@ -136,7 +146,10 @@ void main(int argc, char *argv[]) {
 	int i = 5; 
 	char *number; 
 
-	fork_process(DEPOSIT, 100);
+	fork_process(WITHDRAW, 700);
+	stall();
+	fork_process(DEPOSIT, 500);
+
 
 
 /*
