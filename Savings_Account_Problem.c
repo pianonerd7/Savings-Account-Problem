@@ -149,14 +149,23 @@ void main(int argc, char *argv[]) {
 	//set initial values of shared memory
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
+	shared_variable->list = NULL;
 
 	int i = 5; 
 	char *number; 
 
 	//check_linkedlist();
-	fork_process(WITHDRAW, 700);
-	stall();
+	//fork_process(WITHDRAW, 700);
+	//stall();
 	fork_process(DEPOSIT, 500);
+	stall();
+	fork_process(DEPOSIT, 100);
+	stall();
+	fork_process(DEPOSIT, 300);
+	stall();
+	fork_process(DEPOSIT, 200);
+	stall();
+	
 
 
 
@@ -271,7 +280,6 @@ void withdraw(int withdraw_amount) {
 		struct Node * list_head = &(shared_variable->list);
 		//Remove own request from the waiting list
 		DeleteFirstElement(&list_head);
-
 		shared_variable->wcount = shared_variable->wcount - 1;
 
 		if (shared_variable->wcount > 1 && (FirstElementVal(&(shared_variable->list)) < shared_variable->balance)) {
