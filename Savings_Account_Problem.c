@@ -151,13 +151,13 @@ void main() {
 	shared_variable->balance = 500;
 
 	struct Node *test = &(shared_variable->list);
-	DeleteFirstElement(&test);
+	//DeleteFirstElement(&test);
 	print_list(test);
 	
 	int i = 2; 
 
 	//check_linkedlist();
-	fork_process(WITHDRAW, 700);
+	fork_process(DEPOSIT, 600);
 	stall();
 	fork_process(DEPOSIT, 500);
 
@@ -201,7 +201,7 @@ void deposit(int deposit_amount) {
 	debug_print_shared(shared_variable);
 
 	//no withdraws at this time
-	if (shared_variable->wcount	= 1) {
+	if (shared_variable->wcount	== 0) {
 		printf("---PID: %d: D: Signaling MUTEX. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
