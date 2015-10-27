@@ -39,8 +39,8 @@ void fork_process(int deposit_or_withdraw);
 
 //LinkedList manipulation procedures
 void AddToEndOfList(struct Node *A, int val);
-void DeleteFirstElement(struct Node A);
-int FirstElementVal(struct Node A);
+void DeleteFirstElement(struct Node *A);
+int FirstElementVal(struct Node *A);
 
 void semaphore_wait();
 void semaphore_signal();
@@ -57,9 +57,57 @@ union semun {
                                 (Linux-specific) */
 };
 
+void print_list(struct Node *head) {
+	struct Node *current = head;
+
+	printf("\t Beginning of list\n");
+	while (current != NULL) {
+		printf("%d\n", current->data);
+		current = current ->next;
+	}
+	printf("\t End of list \n");
+}
+
+void debug_print_shared(struct shared_variable_struct *shared) {
+
+	int wcount;
+	int balance;
+	struct Node *list;
+
+	wcount = shared->wcount;
+	balance = shared->balance;
+	list = &(shared->list);
+
+	printf("\t Share Variable status at PID %d: wcount = %d, balance = %d", getpid(), wcount, balance);
+	print_list(list);
+}
+
+void check_linkedlist() {
+	struct Node *test = malloc(sizeof(struct Node));
+	test->data = 1;
+	test->next = malloc(sizeof(struct Node));
+	test->next->data = 2;
+	test->next->next = malloc(sizeof(struct Node));
+	test->next->next->data = 3;
+	
+	printf("start \n");
+	printf("first element value is %d\n", FirstElementVal(test));
+
+	print_list(test);
+
+	printf("\n\n\nnew \n");
+	AddToEndOfList(test, 4);
+
+	print_list(test);
+
+	free(test);
+
+	printf("end\n");
+}
 //"-, 2, 0", "4, 0"
 void main(int argc, char *argv[]) {
-	printf("***Hello world! I am %d. \n", getpid());
+
+	printf("*** Hello world! I am %d. \n", getpid());
 
 	union semun semaphore_values;
 
@@ -86,7 +134,7 @@ void main(int argc, char *argv[]) {
 	//shared_variable->list = NULL;
 
 	int i = 0; 
-	char *number;
+	char *number; 
 
 /*
 	while (argv[1][i] != '\0') {
@@ -97,63 +145,96 @@ void main(int argc, char *argv[]) {
 }
 
 void deposit(int deposit_amount) {
-	printf("***PID: %d: I am a DEPOSIT! \n", getpid());
+	printf("***PID: %d: I am a DEPOSIT of amount %d! \n", getpid(), deposit_amount);
 
 	//Get the semaphores and shared memory
 	int semid = get_semid((key_t)SEMAPHORE_KEY);
 	int shmid = get_shmid((key_t)SEMAPHORE_KEY);
 	struct shared_variable_struct * shared_variable = shmat(shmid, 0, 0);
 
-	printf("--- PID: %d: E: Waiting on Mutex.\n", getpid());
+	printf("---PID: %d: D: Waiting on Mutex.\n", getpid());
 	semaphore_wait(semid, SEMAPHORE_MUTEX);
-	printf("--- PID: %d: E: Passed Mutex.\n", getpid());
+	printf("---PID: %d: D: Passed Mutex.\n", getpid());
 	
 	shared_variable->balance + deposit_amount;
+	printf("---PID: %d: D: An amount of %d has been added to the balance.\n", getpid(), deposit_amount);
+	debug_print_shared(shared_variable);
 
+	//no withdraws at this time
 	if (shared_variable->wcount	= 0) {
+		printf("---PID: %d: D: Signaling MUTEX. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
-	else if (FirstElementVal(shared_variable->list) > shared_variable->balance) {
+	//Still not enough balance for 1st waiting withdraw request
+	else if (FirstElementVal(&(shared_variable->list)) > shared_variable->balance) {
+		printf("---PID: %d: D: Signaling MUTEX. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
+	//release the earliest waiting customer
 	else {
+		printf("---PID: %d: D: Signaling wlist. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_wlist);
 	}
+	exit(EXIT_SUCCESS);
 }
 
 void withdraw(int withdraw_amount) {
-	printf("***PID: %d: I am a WITHDRAW! \n", getpid());
+	printf("***PID: %d: I am a WITHDRAW of amount %d! \n", getpid(), withdraw_amount);
 
 	//Get the semaphores and shared memory
 	int semid = get_semid((key_t)SEMAPHORE_KEY);
 	int shmid = get_shmid((key_t)SEMAPHORE_KEY);
 	struct shared_variable_struct * shared_variable = shmat(shmid, 0, 0);
 	
-	printf("--- PID: %d: E: Waiting on Mutex.\n", getpid());
+	printf("--- PID: %d: W: Waiting on Mutex.\n", getpid());
 	semaphore_wait(semid, SEMAPHORE_MUTEX);
-	printf("--- PID: %d: E: Passed Mutex.\n", getpid());
+	printf("--- PID: %d: W: Passed Mutex.\n", getpid());
 
+	//Enough balance to withdraw
 	if (shared_variable->wcount == 0 && shared_variable->balance > withdraw_amount) {
 		shared_variable->balance = shared_variable->balance - withdraw_amount;
+
+		printf("---PID: %d: W: An amount of %d has been deducted from the balance.\n", getpid(), withdraw_amount);
+		debug_print_shared(shared_variable);
+
+		printf("---PID: %d: W: Signaling MUTEX. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
+	//Either other withdrawal requests are waiting or not enough balance
 	else {
 		shared_variable->wcount	= shared_variable->wcount + 1;
 
 		AddToEndOfList(&(shared_variable->list), 0 - withdraw_amount);
+
+		debug_print_shared(shared_variable);
+
+		printf("---PID: %d: W: Signaling MUTEX. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
+
+		//Wait for a deposit
 		semaphore_wait(semid, SEMAPHORE_wlist);
-		shared_variable->balance = shared_variable->balance	- FirstElementVal(shared_variable->list);
-		DeleteFirstElement(shared_variable->list);
+		printf("---PID: %d: W: Was waiting, now I'm signaled. \n", getpid());
+
+		//Withdraw
+		shared_variable->balance = shared_variable->balance	- FirstElementVal(&(shared_variable->list));
+		printf("---PID: %d: W: First element value is deducted from balance. \n", getpid());
+		debug_print_shared(shared_variable);
+
+		//Remove own request from the waiting list
+		DeleteFirstElement(&(shared_variable->list));
 		shared_variable->wcount = shared_variable->wcount - 1;
 
-		if (shared_variable->wcount > 1 && (FirstElementVal(shared_variable->list) < shared_variable->balance)) {
+		if (shared_variable->wcount > 1 && (FirstElementVal(&(shared_variable->list)) < shared_variable->balance)) {
+			printf("---PID: %d: W: Signaling wlist. \n", getpid());
 			semaphore_signal(semid, SEMAPHORE_wlist);
 		}
+		//This signal() is paired with the depositing customer's wait(mutex)
 		else {
+			printf("---PID: %d: W: Signaling MUTEX. \n", getpid());
 			semaphore_signal(SEMAPHORE_MUTEX);
 		}
 	}
+	exit(EXIT_SUCCESS);
 }
 
 void fork_process(int deposit_or_withdraw) {
@@ -195,14 +276,17 @@ void AddToEndOfList(struct Node *A, int val) {
 	current->next->next = NULL;
 }
 
-void DeleteFirstElement(struct Node A) {
+void DeleteFirstElement(struct Node *A) {
 	if (A != NULL) {
 		struct Node *newHead = A->next;
 	}
 }
 
-int FirstElementVal(struct Node A) {
-	return A->data;
+int FirstElementVal(struct Node *A) {
+	struct Node *current = A;
+	
+	int data = current->data;
+	return data;
 }
 
 void semaphore_wait(int semid, int semnumber) {
@@ -233,4 +317,22 @@ void semaphore_signal(int semid, int semnumber) {
 		perror("semaphore_signal failed");
 		exit(EXIT_FAILURE);
 	}
+}
+
+int get_semid(key_t semkey) {
+	int value = semget(semkey, NUMBER_OF_SEMAPHORES, 0777 | IPC_CREAT);
+	if (value == -1) {
+		perror("semget failed");
+		exit(EXIT_FAILURE);
+	}
+	return value;
+}
+
+int get_shmid(key_t shmkey) {
+	int value = shmget(shmkey, sizeof(struct shared_variable_struct), 0777 | IPC_CREAT);
+	if (value == -1) {
+		perror("shmkey failed");
+		exit(EXIT_FAILURE);
+	}
+	return value;
 }
