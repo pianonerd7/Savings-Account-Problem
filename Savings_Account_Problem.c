@@ -157,7 +157,7 @@ void main() {
 	int i = 2; 
 
 	//check_linkedlist();
-	fork_process(DEPOSIT, 600);
+	fork_process(WITHDRAW, 600);
 	stall();
 	fork_process(DEPOSIT, 500);
 
@@ -267,6 +267,8 @@ void withdraw(int withdraw_amount) {
 		struct Node * list_head = &(shared_variable->list);
 		//Remove own request from the waiting list
 		DeleteFirstElement(&list_head);
+		printf("******* DEBUG ONLY***** \n");
+
 		shared_variable->wcount = shared_variable->wcount - 1;
 
 		if (shared_variable->wcount > 1 && (FirstElementVal(&(shared_variable->list)) < shared_variable->balance)) {
@@ -332,15 +334,21 @@ void AddToEndOfList(struct Node *A, int val) {
 }
 
 void DeleteFirstElement(struct Node **A) {
+	printf("\n\n\n\n IVE ENTERED DELETE FIRST ELEMENT \n\n\n\n\n");
 	struct Node *next_node = NULL;
 
+	/*
 	if (*A == NULL) {
 		return;
 	}
+	*/
 
 	next_node = (*A)->next;
-	//free(*A);
+	free(A);
 	*A = next_node;
+	print_list(next_node);
+
+	printf("\n\n\n\n IM LEAVING \n\n\n\n");
 }
 
 int FirstElementVal(struct Node *A) {
