@@ -110,9 +110,6 @@ void check_linkedlist() {
 	struct Node *test = malloc(sizeof(struct Node));
 	print_list(test);
 	AddToEndOfList(test, 1);
-	AddToEndOfList(test, 2);
-	AddToEndOfList(test, 3);
-	AddToEndOfList(test, 4);
 	print_list(test);
 	DeleteFirstElement(&test);
 	print_list(test);
@@ -274,6 +271,7 @@ void withdraw(int withdraw_amount) {
 		struct Node * list_head = &(shared_variable->list);
 		//Remove own request from the waiting list
 		DeleteFirstElement(&list_head);
+
 		shared_variable->wcount = shared_variable->wcount - 1;
 
 		if (shared_variable->wcount > 1 && (FirstElementVal(&(shared_variable->list)) < shared_variable->balance)) {
