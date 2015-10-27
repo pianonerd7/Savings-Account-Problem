@@ -39,7 +39,7 @@ void fork_process(int deposit_or_withdraw, int amount);
 
 //LinkedList manipulation procedures
 void AddToEndOfList(struct Node *A, int val);
-void DeleteFirstElement(struct Node *A);
+void DeleteFirstElement(struct Node **A);
 int FirstElementVal(struct Node *A);
 
 void stall();
@@ -108,11 +108,13 @@ void check_linkedlist() {
 	printf("end\n"); */
 
 	struct Node *test = malloc(sizeof(struct Node));
+	print_list(test);
 	AddToEndOfList(test, 1);
 	AddToEndOfList(test, 2);
 	AddToEndOfList(test, 3);
 	AddToEndOfList(test, 4);
-	DeleteFirstElement(test);
+	print_list(test);
+	DeleteFirstElement(&test);
 	print_list(test);
 }
 
@@ -154,10 +156,10 @@ void main(int argc, char *argv[]) {
 	int i = 5; 
 	char *number; 
 
-	check_linkedlist();
-	//fork_process(WITHDRAW, 700);
-	//stall();
-	//fork_process(DEPOSIT, 500);
+	//check_linkedlist();
+	fork_process(WITHDRAW, 700);
+	stall();
+	fork_process(DEPOSIT, 500);
 
 
 
@@ -221,7 +223,7 @@ void deposit(int deposit_amount) {
 		semaphore_signal(semid, SEMAPHORE_wlist);
 	}
 
-	printf("---PID: %d: D: End of deposit! \n", getpid());
+	printf("---PID: %d: D: End of deposit! BYE! \n", getpid());
 	debug_print_shared(shared_variable);
 
 	exit(EXIT_SUCCESS);
@@ -269,8 +271,9 @@ void withdraw(int withdraw_amount) {
 		printf("---PID: %d: W: First element value is deducted from balance. \n", getpid());
 		debug_print_shared(shared_variable);
 
+		struct Node * list_head = &(shared_variable->list);
 		//Remove own request from the waiting list
-		DeleteFirstElement(&(shared_variable->list));
+		DeleteFirstElement(&list_head);
 		shared_variable->wcount = shared_variable->wcount - 1;
 
 		if (shared_variable->wcount > 1 && (FirstElementVal(&(shared_variable->list)) < shared_variable->balance)) {
@@ -284,7 +287,7 @@ void withdraw(int withdraw_amount) {
 		}
 	}
 
-	printf("---PID: %d: W: End of withdraw! \n", getpid());
+	printf("---PID: %d: W: End of withdraw! BYE! \n", getpid());
 	debug_print_shared(shared_variable);
 
 	exit(EXIT_SUCCESS);
@@ -335,14 +338,14 @@ void AddToEndOfList(struct Node *A, int val) {
 	current->next->next = NULL;
 }
 
-void DeleteFirstElement(struct Node *A) {
-	struct Node *current = A;
+void DeleteFirstElement(struct Node **A) {
+	struct Node *next_node = NULL;
 
-	if (current->data == -1) {
+	if (*A == NULL) {
 		return;
 	}
 
-	struct Node *next_node = A->next;
+	next_node = (*A)->next;
 	free(*A);
 	*A = next_node;
 }
