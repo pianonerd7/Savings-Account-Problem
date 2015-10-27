@@ -22,6 +22,19 @@
 #define DEPOSIT 1
 #define WITHDRAW 2
 
+//Node for linkedlist
+struct Node {
+	int data;
+	struct Node *next;
+};
+
+//Shared memory struct to store shared variables 
+struct shared_variable_struct {
+	int wcount;
+	int balance;
+	struct Node list;
+};
+
 void fork_process(int deposit_or_withdraw);
 
 //LinkedList manipulation procedures
@@ -44,21 +57,8 @@ union semun {
                                 (Linux-specific) */
 };
 
-//Shared memory struct to store shared variables 
-struct shared_variable {
-	int wcount =0;
-	int balance =500;
-	struct Node list =NULL;
-}
-
-//Node for linkedlist
-struct Node {
-	int data;
-	struct Node *next;
-};
-
 //"-, 2, 0", "4, 0"
-int main(int argc, char *argv[]) {
+void main(int argc, char *argv[]) {
 	printf("***Hello world! I am %d. \n", getpid());
 
 	union semun semaphore_values;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 	//set initial values of shared memory
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
-	shared_variable->list = NULL;
+	//shared_variable->list = NULL;
 
 	int i = 0; 
 	char *number;
@@ -96,39 +96,13 @@ int main(int argc, char *argv[]) {
 	} */
 }
 
-void fork_process(int deposit_or_withdraw) {
-	pid_t child_pid;
-	child_pid = fork();
-
-	if (child_pid == -1) {
-		perror("Fork Failed");
-		exit(EXIT_FAILURE);
-	}
-	else if (child_pid == 0) {
-		//child
-		if (deposit_or_withdraw == DEPOSIT) {
-			deposit();
-		}
-		else if (deposit_or_withdraw == WITHDRAW) {
-			withdraw();
-		}
-		else {
-			printf("!!! Invalid transaction type! \n");
-			exit(EXIT_FAILURE);
-		}
-	}
-	else {
-		//parent
-		return;
-	}
-}
-
 void deposit(int deposit_amount) {
 	printf("***PID: %d: I am a DEPOSIT! \n", getpid());
 
 	//Get the semaphores and shared memory
 	int semid = get_semid((key_t)SEMAPHORE_KEY);
 	int shmid = get_shmid((key_t)SEMAPHORE_KEY);
+	struct shared_variable_struct * shared_variable = shmat(shmid, 0, 0);
 
 	printf("--- PID: %d: E: Waiting on Mutex.\n", getpid());
 	semaphore_wait(semid, SEMAPHORE_MUTEX);
@@ -139,7 +113,7 @@ void deposit(int deposit_amount) {
 	if (shared_variable->wcount	= 0) {
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
-	else if (FirstElementVal(shared_variable->list) > balance) {
+	else if (FirstElementVal(shared_variable->list) > shared_variable->balance) {
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
 	else {
@@ -153,13 +127,14 @@ void withdraw(int withdraw_amount) {
 	//Get the semaphores and shared memory
 	int semid = get_semid((key_t)SEMAPHORE_KEY);
 	int shmid = get_shmid((key_t)SEMAPHORE_KEY);
-
+	struct shared_variable_struct * shared_variable = shmat(shmid, 0, 0);
+	
 	printf("--- PID: %d: E: Waiting on Mutex.\n", getpid());
 	semaphore_wait(semid, SEMAPHORE_MUTEX);
 	printf("--- PID: %d: E: Passed Mutex.\n", getpid());
 
 	if (shared_variable->wcount == 0 && shared_variable->balance > withdraw_amount) {
-		shared_variable->balance = balance - withdraw_amount;
+		shared_variable->balance = shared_variable->balance - withdraw_amount;
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
 	else {
@@ -177,6 +152,33 @@ void withdraw(int withdraw_amount) {
 		else {
 			semaphore_signal(SEMAPHORE_MUTEX);
 		}
+	}
+}
+
+void fork_process(int deposit_or_withdraw) {
+	pid_t child_pid;
+	child_pid = fork();
+
+	if (child_pid == -1) {
+		perror("Fork Failed");
+		exit(EXIT_FAILURE);
+	}
+	else if (child_pid == 0) {
+		//child
+		if (deposit_or_withdraw == DEPOSIT) {
+			deposit(2);
+		}
+		else if (deposit_or_withdraw == WITHDRAW) {
+			withdraw(2);
+		}
+		else {
+			printf("!!! Invalid transaction type! \n");
+			exit(EXIT_FAILURE);
+		}
+	}
+	else {
+		//parent
+		return;
 	}
 }
 
