@@ -133,8 +133,11 @@ void main(int argc, char *argv[]) {
 	shared_variable->balance = 500;
 	//shared_variable->list = NULL;
 
-	int i = 0; 
+	int i = 5; 
 	char *number; 
+
+	fork_process(DEPOSIT, 100);
+
 
 /*
 	while (argv[1][i] != '\0') {
@@ -142,6 +145,26 @@ void main(int argc, char *argv[]) {
 			number 
 		}
 	} */
+
+	//Wait until all the processes exit
+	int j;
+	for (j = 0; j < i; j++) {
+		wait(NULL);
+	}
+
+	//Clean up
+	if (shmdt(shared_variable) == -1) {
+		perror("shmt failed");
+		exit(EXIT_FAILURE);
+	}
+	if (shmctl(shmid, IPC_RMID, NULL) < 0) {
+		perror("shmctrl failed");
+		exit(EXIT_FAILURE);
+	}
+	if (semctl(semid, SEMAPHORE_MUTEX, IPC_RMID, semaphore_values) == -1) {
+		perror("semctl failed");
+		exit(EXIT_FAILURE);
+	}
 }
 
 void deposit(int deposit_amount) {
@@ -175,6 +198,10 @@ void deposit(int deposit_amount) {
 		printf("---PID: %d: D: Signaling wlist. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_wlist);
 	}
+
+	printf("---PID: %d: D: End of deposit!", getpid());
+	debug_print_shared(shared_variable);
+
 	exit(EXIT_SUCCESS);
 }
 
@@ -204,7 +231,7 @@ void withdraw(int withdraw_amount) {
 	else {
 		shared_variable->wcount	= shared_variable->wcount + 1;
 
-		AddToEndOfList(&(shared_variable->list), 0 - withdraw_amount);
+		AddToEndOfList(&(shared_variable->list), withdraw_amount);
 
 		debug_print_shared(shared_variable);
 
@@ -234,10 +261,14 @@ void withdraw(int withdraw_amount) {
 			semaphore_signal(SEMAPHORE_MUTEX);
 		}
 	}
+
+	printf("---PID: %d: W: End of withdraw!", getpid());
+	debug_print_shared(shared_variable);
+
 	exit(EXIT_SUCCESS);
 }
 
-void fork_process(int deposit_or_withdraw) {
+void fork_process(int deposit_or_withdraw, int amount) {
 	pid_t child_pid;
 	child_pid = fork();
 
@@ -248,10 +279,10 @@ void fork_process(int deposit_or_withdraw) {
 	else if (child_pid == 0) {
 		//child
 		if (deposit_or_withdraw == DEPOSIT) {
-			deposit(2);
+			deposit(amount);
 		}
 		else if (deposit_or_withdraw == WITHDRAW) {
-			withdraw(2);
+			withdraw(amount);
 		}
 		else {
 			printf("!!! Invalid transaction type! \n");
