@@ -62,12 +62,12 @@ union semun {
 void print_list(struct Node *head) {
 	struct Node *current = head;
 
-	printf("\t Beginning of list\n");
+	printf("\t Beginning of waiting withdraw list\n");
 	while (current != NULL) {
 		printf("\t %d\n", current->data);
 		current = current ->next;
 	}
-	printf("\t End of list \n");
+	printf("\t End of waiting withdraw list \n");
 }
 
 void debug_print_shared(struct shared_variable_struct *shared) {
@@ -85,6 +85,7 @@ void debug_print_shared(struct shared_variable_struct *shared) {
 }
 
 void check_linkedlist() {
+	/*
 	struct Node *test = malloc(sizeof(struct Node));
 	test->data = 1;
 	test->next = malloc(sizeof(struct Node));
@@ -104,12 +105,20 @@ void check_linkedlist() {
 
 	free(test);
 
-	printf("end\n");
+	printf("end\n"); */
+
+	struct Node *test = malloc(sizeof(struct Node));
+	AddToEndOfList(test, 1);
+	AddToEndOfList(test, 2);
+	AddToEndOfList(test, 3);
+	AddToEndOfList(test, 4);
+	DeleteFirstElement(test);
+	print_list(test);
 }
 
 void stall() {
 	int i;
-	for(i = 0; i < 100000; i++) {
+	for(i = 0; i < 10000000; i++) {
 		;
 	}
 }
@@ -141,14 +150,14 @@ void main(int argc, char *argv[]) {
 	//set initial values of shared memory
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
-	//shared_variable->list = NULL;
 
 	int i = 5; 
 	char *number; 
 
-	fork_process(WITHDRAW, 700);
-	stall();
-	fork_process(DEPOSIT, 500);
+	check_linkedlist();
+	//fork_process(WITHDRAW, 700);
+	//stall();
+	//fork_process(DEPOSIT, 500);
 
 
 
@@ -226,9 +235,9 @@ void withdraw(int withdraw_amount) {
 	int shmid = get_shmid((key_t)SEMAPHORE_KEY);
 	struct shared_variable_struct * shared_variable = shmat(shmid, 0, 0);
 	
-	printf("--- PID: %d: W: Waiting on Mutex.\n", getpid());
+	printf("---PID: %d: W: Waiting on Mutex.\n", getpid());
 	semaphore_wait(semid, SEMAPHORE_MUTEX);
-	printf("--- PID: %d: W: Passed Mutex.\n", getpid());
+	printf("---PID: %d: W: Passed Mutex.\n", getpid());
 
 	//Enough balance to withdraw
 	if (shared_variable->wcount == 0 && shared_variable->balance > withdraw_amount) {
@@ -311,6 +320,12 @@ void fork_process(int deposit_or_withdraw, int amount) {
 void AddToEndOfList(struct Node *A, int val) {
 
 	struct Node *current = A;
+
+	if (current->data == 0) {
+		current->data = val;
+		return;
+	}
+
 	while (current->next != NULL) {
 		current = current ->next;
 	}
@@ -321,9 +336,15 @@ void AddToEndOfList(struct Node *A, int val) {
 }
 
 void DeleteFirstElement(struct Node *A) {
-	if (A != NULL) {
-		struct Node *newHead = A->next;
+	struct Node *current = A;
+
+	if (current->data == -1) {
+		return;
 	}
+
+	struct Node *next_node = A->next;
+	free(*A);
+	*A = next_node;
 }
 
 int FirstElementVal(struct Node *A) {
