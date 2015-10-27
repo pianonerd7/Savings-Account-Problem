@@ -57,12 +57,43 @@ struct Node {
 	struct Node *next;
 };
 
-int main() {
+//"-, 2, 0", "4, 0"
+int main(int argc, char *argv[]) {
+	printf("***Hello world! I am %d. \n", getpid());
 
 	union semun semaphore_values;
 
+	//setup semaphores
 	unsigned short semaphore_init_values[NUMBER_OF_SEMAPHORES];
-	//semaphore_init_values
+	semaphore_init_values[SEMAPHORE_MUTEX] = 1;
+	semaphore_init_values[SEMAPHORE_wlist] = 0;
+	semaphore_values.array = semaphore_init_values;
+
+	//make semaphores
+	int semid = get_semid((key_t)SEMAPHORE_KEY);
+	if (semctl(semid, SEMAPHORE_MUTEX, SETALL, semaphore_values) == -1) {
+		perror("semctl failed");
+		exit(EXIT_FAILURE);
+	}
+
+	//shared memory
+	int shmid = get_shmid((key_t)SEMAPHORE_KEY);
+	struct shared_variable_struct * shared_variable = shmat(shmid, 0, 0);
+
+	//set initial values of shared memory
+	shared_variable->wcount	= 0;
+	shared_variable->balance = 500;
+	shared_variable->list = NULL;
+
+	int i = 0; 
+	char *number;
+
+/*
+	while (argv[1][i] != '\0') {
+		while (argv[1][i] != ',') {
+			number 
+		}
+	} */
 }
 
 void fork_process(int deposit_or_withdraw) {
