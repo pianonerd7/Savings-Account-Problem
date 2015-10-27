@@ -109,8 +109,8 @@ void check_linkedlist() {
 
 	struct Node *test = malloc(sizeof(struct Node));
 	print_list(test);
-	AddToEndOfList(test, 1);
-	print_list(test);
+	//AddToEndOfList(test, 1);
+	//print_list(test);
 	DeleteFirstElement(&test);
 	print_list(test);
 }
@@ -123,7 +123,7 @@ void stall() {
 }
 
 //"-, 2, 0", "4, 0"
-void main(int argc, char *argv[]) {
+void main() {
 
 	printf("*** Hello world! I am %d. \n", getpid());
 
@@ -150,8 +150,11 @@ void main(int argc, char *argv[]) {
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
 
-	int i = 5; 
-	char *number; 
+	struct Node *test = &(shared_variable->list);
+	DeleteFirstElement(&test);
+	print_list(test);
+	
+	int i = 2; 
 
 	//check_linkedlist();
 	fork_process(WITHDRAW, 700);
@@ -159,15 +162,6 @@ void main(int argc, char *argv[]) {
 	fork_process(DEPOSIT, 500);
 
 	
-
-
-
-/*
-	while (argv[1][i] != '\0') {
-		while (argv[1][i] != ',') {
-			number 
-		}
-	} */
 
 	//Wait until all the processes exit
 	int j;
@@ -345,7 +339,7 @@ void DeleteFirstElement(struct Node **A) {
 	}
 
 	next_node = (*A)->next;
-	free(*A);
+	//free(*A);
 	*A = next_node;
 }
 
