@@ -35,7 +35,7 @@ struct shared_variable_struct {
 	struct Node list;
 };
 
-void fork_process(int deposit_or_withdraw);
+void fork_process(int deposit_or_withdraw, int amount);
 
 //LinkedList manipulation procedures
 void AddToEndOfList(struct Node *A, int val);
@@ -62,7 +62,7 @@ void print_list(struct Node *head) {
 
 	printf("\t Beginning of list\n");
 	while (current != NULL) {
-		printf("%d\n", current->data);
+		printf("\t %d\n", current->data);
 		current = current ->next;
 	}
 	printf("\t End of list \n");
@@ -78,7 +78,7 @@ void debug_print_shared(struct shared_variable_struct *shared) {
 	balance = shared->balance;
 	list = &(shared->list);
 
-	printf("\t Share Variable status at PID %d: wcount = %d, balance = %d", getpid(), wcount, balance);
+	printf("\t Share Variable status at PID %d: wcount = %d, balance = %d \n", getpid(), wcount, balance);
 	print_list(list);
 }
 
@@ -179,7 +179,7 @@ void deposit(int deposit_amount) {
 	semaphore_wait(semid, SEMAPHORE_MUTEX);
 	printf("---PID: %d: D: Passed Mutex.\n", getpid());
 	
-	shared_variable->balance + deposit_amount;
+	shared_variable->balance = shared_variable->balance + deposit_amount;
 	printf("---PID: %d: D: An amount of %d has been added to the balance.\n", getpid(), deposit_amount);
 	debug_print_shared(shared_variable);
 
@@ -199,7 +199,7 @@ void deposit(int deposit_amount) {
 		semaphore_signal(semid, SEMAPHORE_wlist);
 	}
 
-	printf("---PID: %d: D: End of deposit!", getpid());
+	printf("---PID: %d: D: End of deposit! \n", getpid());
 	debug_print_shared(shared_variable);
 
 	exit(EXIT_SUCCESS);
@@ -262,7 +262,7 @@ void withdraw(int withdraw_amount) {
 		}
 	}
 
-	printf("---PID: %d: W: End of withdraw!", getpid());
+	printf("---PID: %d: W: End of withdraw! \n", getpid());
 	debug_print_shared(shared_variable);
 
 	exit(EXIT_SUCCESS);
