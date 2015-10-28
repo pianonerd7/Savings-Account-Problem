@@ -32,7 +32,7 @@ struct Node {
 struct shared_variable_struct {
 	int wcount;
 	int balance;
-	struct Node list;
+	struct Node *list;
 };
 
 void fork_process(int deposit_or_withdraw, int amount);
@@ -78,7 +78,7 @@ void debug_print_shared(struct shared_variable_struct *shared) {
 
 	wcount = shared->wcount;
 	balance = shared->balance;
-	list = &(shared->list);
+	list = shared->list;
 
 	printf("\t Share Variable status at PID %d: wcount = %d, balance = %d \n", getpid(), wcount, balance);
 	print_list(list);
@@ -187,7 +187,7 @@ void deposit(int deposit_amount) {
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
 	//Still not enough balance for 1st waiting withdraw request
-	else if (FirstElementVal(&(shared_variable->list)) > shared_variable->balance) {
+	else if (FirstElementVal(shared_variable->list) > shared_variable->balance) {
 		printf("---PID: %d: D: Signaling MUTEX. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
 	}
@@ -229,7 +229,7 @@ void withdraw(int withdraw_amount) {
 	else {
 		shared_variable->wcount	= shared_variable->wcount + 1;
 		printf("GOT TO HERE1 \n\n\n");
-		AddToEndOfList(&(shared_variable->list), withdraw_amount);
+		AddToEndOfList(shared_variable->list, withdraw_amount);
 		printf("GOT TO HERE2 \n\n\n");
 		debug_print_shared(shared_variable);
 
@@ -241,17 +241,17 @@ void withdraw(int withdraw_amount) {
 		printf("---PID: %d: W: Was waiting, now I'm signaled. \n", getpid());
 
 		//Withdraw
-		shared_variable->balance = shared_variable->balance	- FirstElementVal(&(shared_variable->list));
+		shared_variable->balance = shared_variable->balance	- FirstElementVal(shared_variable->list);
 		printf("---PID: %d: W: First element value is deducted from balance. \n", getpid());
 		
 		//Remove own request from the waiting list
-		shared_variable->list = *(DeleteFirstElement(&(shared_variable->list)));
+		shared_variable->list = DeleteFirstElement(shared_variable->list);
 
-		print_list(&shared_variable->list);
+		print_list(shared_variable->list);
 
 		shared_variable->wcount = shared_variable->wcount - 1;
 
-		if (shared_variable->wcount > 0 && (FirstElementVal(&(shared_variable->list)) < shared_variable->balance)) {
+		if (shared_variable->wcount > 0 && (FirstElementVal(shared_variable->list) < shared_variable->balance)) {
 			printf("---PID: %d: W: Signaling wlist. \n", getpid());
 			semaphore_signal(semid, SEMAPHORE_wlist);
 		}
