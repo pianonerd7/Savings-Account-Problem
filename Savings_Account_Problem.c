@@ -118,8 +118,28 @@ void main() {
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
 	shared_variable->list = malloc(sizeof(struct Node));
-	
+	struct Node *l = shared_variable->list;
+	l->data = 0;
+	//debug_print_shared(shared_variable);
+	//struct Node *test = shared_variable->list;
+
+/*
+	shared_variable->list = malloc(sizeof(struct Node));
+	struct Node *test = shared_variable->list;
+	printf("ADDING 1\n");
+	AddToEndOfList(test, 1);
+	sleep(4);
+		printf("ADDING 2\n");
+	AddToEndOfList(test, 2);
+	sleep(4);
+		printf("ADDING 3\n");
+	AddToEndOfList(test, 3);
+	//DeleteFirstElement(test);
+
+	debug_print_shared(shared_variable); */
 	int i = 5; 
+
+
 
 
 	fork_process(WITHDRAW, 600);
@@ -132,7 +152,7 @@ void main() {
 	sleep(5);
 	fork_process(DEPOSIT, 3000);
 	sleep(5);
-	/*fork_process(WITHDRAW, 400);
+	fork_process(WITHDRAW, 400);
 	stall();
 	fork_process(WITHDRAW, 700);
 	stall();
@@ -141,8 +161,7 @@ void main() {
 	fork_process(WITHDRAW, 400);
 	stall();
 	fork_process(DEPOSIT, 700);
-	stall();*/
-
+	stall();
 
 	//Wait until all the processes exit
 	int j;
@@ -296,12 +315,16 @@ void fork_process(int deposit_or_withdraw, int amount) {
 }
 
 void AddToEndOfList(struct Node *A, int val) {
-	struct Node *current = A;
 
-	if (current->data == 0) {
-		current->data = val;
+	if (A->data == 0) {
+		A->data = val;
+		printf("if head is 0");
+
+		printf("A\n");
+		print_list(A);
 		return;
 	}
+	struct Node *current = A;
 
 	while (current->next != NULL) {
 		current = current ->next;
@@ -310,6 +333,10 @@ void AddToEndOfList(struct Node *A, int val) {
 	current->next = malloc(sizeof(struct Node));
 	current->next->data = val;
 	current->next->next = NULL;
+
+	printf("\t\t\t in add to end of list\n");
+	print_list(A);
+	printf("\t\t\t ending add to end of list\n");
 }
 
 struct Node * DeleteFirstElement(struct Node *A) {
@@ -324,7 +351,7 @@ struct Node * DeleteFirstElement(struct Node *A) {
 	}
 
 	A = A->next;
-	//free(temp);
+	free(temp);
 
 	printf("in delete\n");
 	print_list(A);
