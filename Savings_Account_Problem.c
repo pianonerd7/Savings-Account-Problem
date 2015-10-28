@@ -84,37 +84,6 @@ void debug_print_shared(struct shared_variable_struct *shared) {
 	print_list(list);
 }
 
-void check_linkedlist() {
-	/*
-	struct Node *test = malloc(sizeof(struct Node));
-	test->data = 1;
-	test->next = malloc(sizeof(struct Node));
-	test->next->data = 2;
-	test->next->next = malloc(sizeof(struct Node));
-	test->next->next->data = 3;
-	
-	printf("start \n");
-	printf("first element value is %d\n", FirstElementVal(test));
-
-	print_list(test);
-
-	printf("\n\n\nnew \n");
-	AddToEndOfList(test, 4);
-
-	print_list(test);
-
-	free(test);
-
-	printf("end\n"); */
-
-	struct Node *test = malloc(sizeof(struct Node));
-	print_list(test);
-	//AddToEndOfList(test, 1);
-	//print_list(test);
-	DeleteFirstElement(&test);
-	print_list(test);
-}
-
 void stall() {
 	int i;
 	for(i = 0; i < 10000000; i++) {
@@ -122,7 +91,6 @@ void stall() {
 	}
 }
 
-//"-, 2, 0", "4, 0"
 void main() {
 
 	printf("*** Hello world! I am %d. \n", getpid());
@@ -160,6 +128,11 @@ void main() {
 	fork_process(WITHDRAW, 600);
 	stall();
 	fork_process(DEPOSIT, 500);
+	stall();
+	fork_process(WITHDRAW, 200);
+	fork_process(WITHDRAW, 100);
+	stall();
+	fork_process(DEPOSIT, 10000);
 
 	
 
@@ -234,8 +207,10 @@ void withdraw(int withdraw_amount) {
 	semaphore_wait(semid, SEMAPHORE_MUTEX);
 	printf("---PID: %d: W: Passed Mutex.\n", getpid());
 
+	struct Node *tmplist = &(shared_variable->list);
 	//Enough balance to withdraw
-	if (shared_variable->wcount == 0 && shared_variable->balance > withdraw_amount) {
+	if ((shared_variable->wcount == 0 || (shared_variable->wcount == 1 && tmplist->data == 0))
+	 && shared_variable->balance > withdraw_amount) {
 		shared_variable->balance = shared_variable->balance - withdraw_amount;
 
 		printf("---PID: %d: W: An amount of %d has been deducted from the balance.\n", getpid(), withdraw_amount);
@@ -267,7 +242,6 @@ void withdraw(int withdraw_amount) {
 		struct Node * list_head = &(shared_variable->list);
 		//Remove own request from the waiting list
 		DeleteFirstElement(&list_head);
-		printf("******* DEBUG ONLY***** \n");
 
 		shared_variable->wcount = shared_variable->wcount - 1;
 
@@ -334,21 +308,13 @@ void AddToEndOfList(struct Node *A, int val) {
 }
 
 void DeleteFirstElement(struct Node **A) {
-	printf("\n\n\n\n IVE ENTERED DELETE FIRST ELEMENT \n\n\n\n\n");
-	struct Node *next_node = NULL;
-
-	/*
-	if (*A == NULL) {
+	struct Node *temp = *A;
+	if (temp == NULL) {
 		return;
 	}
-	*/
 
-	next_node = (*A)->next;
-	free(A);
-	*A = next_node;
-	print_list(next_node);
-
-	printf("\n\n\n\n IM LEAVING \n\n\n\n");
+	*A = temp->next;
+	//free(temp);
 }
 
 int FirstElementVal(struct Node *A) {
