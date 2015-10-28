@@ -56,17 +56,6 @@ union semun {
                                 (Linux-specific) */
 };
 
-void print_list(struct Node *head) {
-	struct Node *current = head;
-
-	printf("\t Beginning of waiting withdraw list\n");
-	while (current != NULL) {
-		printf("\t %d\n", current->data);
-		current = current ->next;
-	}
-	printf("\t End of waiting withdraw list \n");
-}
-
 void debug_print_shared(struct shared_variable_struct *shared) {
 
 	int wcount;
@@ -296,7 +285,6 @@ void AddToEndOfList(struct Node *A, int val) {
 
 struct Node * DeleteFirstElement(struct Node *A) {
 
-	print_list(A);
 	struct Node *temp = A;
 
 	if (A->next == NULL) {
