@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <time.h>
 
 //key for the semaphore
 #define SEMAPHORE_KEY 0XFA78978B
@@ -99,12 +98,6 @@ int Test_Mix_Deposit_Withdraw() {
 }
 
 void main() {
-    time_t rawtime;
-    struct tm *timeinfo;
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-    printf("Current local time and date: %s", asctime(timeinfo));
 
 	printf("*** Hello world! I am %d. \n", getpid());
 
