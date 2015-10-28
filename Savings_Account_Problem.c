@@ -39,7 +39,7 @@ void fork_process(int deposit_or_withdraw, int amount);
 
 //LinkedList manipulation procedures
 void AddToEndOfList(struct Node *A, int val);
-void DeleteFirstElement(struct Node **A);
+struct Node * DeleteFirstElement(struct Node *A);
 int FirstElementVal(struct Node *A);
 
 void stall();
@@ -118,29 +118,57 @@ void main() {
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
 
-	struct Node *test = &(shared_variable->list);
+	//struct Node *test = &(shared_variable->list);
 	//DeleteFirstElement(&test);
-	print_list(test);
+	//print_list(test);
 	
-	int i = 2; 
+	//int i = 2; 
 
-	//check_linkedlist();
+
 	fork_process(WITHDRAW, 600);
 	stall();
 	fork_process(DEPOSIT, 500);
 	stall();
-	fork_process(WITHDRAW, 200);
-	fork_process(WITHDRAW, 100);
+	/*fork_process(WITHDRAW, 100);
 	stall();
-	fork_process(DEPOSIT, 10000);
-
+	fork_process(WITHDRAW, 200);
+	stall();
+	fork_process(WITHDRAW, 300);
+	stall();
+	fork_process(WITHDRAW, 400);
+	stall();
+	fork_process(WITHDRAW, 700);
+	stall();
 	
 
+	/*
+	AddToEndOfList(&(shared_variable->list), 1);
+	AddToEndOfList(&(shared_variable->list), 2);
+	AddToEndOfList(&(shared_variable->list), 3);
+	AddToEndOfList(&(shared_variable->list), 4);
+	print_list(&(shared_variable->list));  
+	shared_variable->list = *(DeleteFirstElement(&(shared_variable->list)));
+	printf("the below shoud be deleted\n");
+	print_list(&(shared_variable->list)); 
+/*
+	struct Node *test = malloc(sizeof(struct Node));
+	test->data = 1;
+	test->next = malloc(sizeof(struct Node));
+	test->next->data = 2;
+	test->next->next = malloc(sizeof(struct Node));
+	test->next->next->data = 3;
+
+	print_list(test);
+	DeleteFirstElement(test);
+	printf("should be deletd\n");
+	print_list(test); */
+
 	//Wait until all the processes exit
+	/*
 	int j;
 	for (j = 0; j < i; j++) {
 		wait(NULL);
-	}
+	}*/
 
 	//Clean up
 	if (shmdt(shared_variable) == -1) {
@@ -241,7 +269,7 @@ void withdraw(int withdraw_amount) {
 
 		struct Node * list_head = &(shared_variable->list);
 		//Remove own request from the waiting list
-		DeleteFirstElement(&list_head);
+		DeleteFirstElement(list_head);
 
 		shared_variable->wcount = shared_variable->wcount - 1;
 
@@ -290,7 +318,6 @@ void fork_process(int deposit_or_withdraw, int amount) {
 }
 
 void AddToEndOfList(struct Node *A, int val) {
-
 	struct Node *current = A;
 
 	if (current->data == 0) {
@@ -307,14 +334,19 @@ void AddToEndOfList(struct Node *A, int val) {
 	current->next->next = NULL;
 }
 
-void DeleteFirstElement(struct Node **A) {
-	struct Node *temp = *A;
-	if (temp == NULL) {
-		return;
-	}
+struct Node * DeleteFirstElement(struct Node *A) {
 
-	*A = temp->next;
+	printf("im in first line of delete yo \n");
+	print_list(A);
+	struct Node *temp = A;
+
+	A = A->next;
 	//free(temp);
+
+	printf("in delete\n");
+	print_list(A);
+	printf("ending delete\n");
+	return A;
 }
 
 int FirstElementVal(struct Node *A) {
@@ -371,3 +403,5 @@ int get_shmid(key_t shmkey) {
 	}
 	return value;
 }
+
+
