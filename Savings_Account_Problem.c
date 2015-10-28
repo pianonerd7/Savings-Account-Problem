@@ -1,3 +1,38 @@
+
+Conversation opened. 2 messages. 1 message unread.
+
+Skip to content
+Using Case Western Reserve University Mail with screen readers
+Jiaxin
+Click here to enable desktop notifications for Case Western Reserve University Mail.   Learn more  Hide
+1 of 14,057
+ 
+(no subject)
+Inbox
+	x
+Jiaxin He	
+	Attachments11:19 AM (27 minutes ago)
+Jiaxin He <jxh604@case.edu>
+	
+Attachments11:46 AM (0 minutes ago)
+		
+to me
+On Wed, Oct 28, 2015 at 11:19 AM, Jiaxin He <jxh604@case.edu> wrote:
+Attachments area
+Preview attachment Savings_Account_Problem.c
+[C]
+	
+Click here to Reply or Forward
+Using 3.82 GB
+Manage
+Program Policies
+Powered by
+Google
+Last account activity: 0 minutes ago
+Currently being used in 1 other location  Details
+	
+	
+
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -11,7 +46,7 @@
 
 
 //key for the semaphore
-#define SEMAPHORE_KEY 0XFA18B
+#define SEMAPHORE_KEY 0XFA78978B
 
 //The position of the various semaphores that we are using in the semaphore array from semget
 #define SEMAPHORE_MUTEX	0
@@ -32,7 +67,7 @@ struct Node {
 struct shared_variable_struct {
 	int wcount;
 	int balance;
-	struct Node list;
+	struct Node *list;
 };
 
 void fork_process(int deposit_or_withdraw, int amount);
@@ -117,20 +152,21 @@ void main() {
 	//set initial values of shared memory
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
+	shared_variable->list = malloc(sizeof(struct Node));
 	
-	int i = 10; 
+	int i = 5; 
 
 
 	fork_process(WITHDRAW, 600);
-	stall();
-	fork_process(WITHDRAW, 100);
-	stall();
+	sleep(5);
+	fork_process(WITHDRAW, 300);
+	sleep(5);
 	fork_process(WITHDRAW, 200);
-	stall();
+	sleep(5);
 	fork_process(WITHDRAW, 200);
-	stall();
+	sleep(5);
 	fork_process(DEPOSIT, 3000);
-	stall();
+	sleep(5);
 	/*fork_process(WITHDRAW, 400);
 	stall();
 	fork_process(WITHDRAW, 700);
@@ -227,14 +263,14 @@ void withdraw(int withdraw_amount) {
 	//Either other withdrawal requests are waiting or not enough balance
 	else {
 		shared_variable->wcount	= shared_variable->wcount + 1;
-
+		printf("GOT TO HERE1 \n\n\n");
 		AddToEndOfList(&(shared_variable->list), withdraw_amount);
-
+		printf("GOT TO HERE2 \n\n\n");
 		debug_print_shared(shared_variable);
 
-		printf("---PID: %d: W: Signaling MUTEX. \n", getpid());
+		printf("---PID: %d: W: Signaling MUTEX. HAHAHA \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
-
+		printf("SIGNALLED MUTEX \n");
 		//Wait for a deposit
 		semaphore_wait(semid, SEMAPHORE_wlist);
 		printf("---PID: %d: W: Was waiting, now I'm signaled. \n", getpid());
@@ -385,5 +421,3 @@ int get_shmid(key_t shmkey) {
 	}
 	return value;
 }
-
-
