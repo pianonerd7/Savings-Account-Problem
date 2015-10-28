@@ -11,7 +11,7 @@
 
 
 //key for the semaphore
-#define SEMAPHORE_KEY 0XFA2B
+#define SEMAPHORE_KEY 0XFA18B
 
 //The position of the various semaphores that we are using in the semaphore array from semget
 #define SEMAPHORE_MUTEX	0
@@ -117,58 +117,37 @@ void main() {
 	//set initial values of shared memory
 	shared_variable->wcount	= 0;
 	shared_variable->balance = 500;
-
-	//struct Node *test = &(shared_variable->list);
-	//DeleteFirstElement(&test);
-	//print_list(test);
 	
-	//int i = 2; 
+	int i = 10; 
 
 
 	fork_process(WITHDRAW, 600);
 	stall();
-	fork_process(DEPOSIT, 500);
-	stall();
-	/*fork_process(WITHDRAW, 100);
+	fork_process(WITHDRAW, 100);
 	stall();
 	fork_process(WITHDRAW, 200);
 	stall();
-	fork_process(WITHDRAW, 300);
+	fork_process(WITHDRAW, 200);
 	stall();
-	fork_process(WITHDRAW, 400);
+	fork_process(DEPOSIT, 3000);
+	stall();
+	/*fork_process(WITHDRAW, 400);
 	stall();
 	fork_process(WITHDRAW, 700);
 	stall();
-	
+	fork_process(DEPOSIT, 300);
+	stall();
+	fork_process(WITHDRAW, 400);
+	stall();
+	fork_process(DEPOSIT, 700);
+	stall();*/
 
-	/*
-	AddToEndOfList(&(shared_variable->list), 1);
-	AddToEndOfList(&(shared_variable->list), 2);
-	AddToEndOfList(&(shared_variable->list), 3);
-	AddToEndOfList(&(shared_variable->list), 4);
-	print_list(&(shared_variable->list));  
-	shared_variable->list = *(DeleteFirstElement(&(shared_variable->list)));
-	printf("the below shoud be deleted\n");
-	print_list(&(shared_variable->list)); 
-/*
-	struct Node *test = malloc(sizeof(struct Node));
-	test->data = 1;
-	test->next = malloc(sizeof(struct Node));
-	test->next->data = 2;
-	test->next->next = malloc(sizeof(struct Node));
-	test->next->next->data = 3;
-
-	print_list(test);
-	DeleteFirstElement(test);
-	printf("should be deletd\n");
-	print_list(test); */
 
 	//Wait until all the processes exit
-	/*
 	int j;
 	for (j = 0; j < i; j++) {
 		wait(NULL);
-	}*/
+	}
 
 	//Clean up
 	if (shmdt(shared_variable) == -1) {
@@ -235,10 +214,8 @@ void withdraw(int withdraw_amount) {
 	semaphore_wait(semid, SEMAPHORE_MUTEX);
 	printf("---PID: %d: W: Passed Mutex.\n", getpid());
 
-	struct Node *tmplist = &(shared_variable->list);
 	//Enough balance to withdraw
-	if ((shared_variable->wcount == 0 || (shared_variable->wcount == 1 && tmplist->data == 0))
-	 && shared_variable->balance > withdraw_amount) {
+	if ((shared_variable->wcount == 0) && shared_variable->balance >= withdraw_amount) {
 		shared_variable->balance = shared_variable->balance - withdraw_amount;
 
 		printf("---PID: %d: W: An amount of %d has been deducted from the balance.\n", getpid(), withdraw_amount);
@@ -265,22 +242,22 @@ void withdraw(int withdraw_amount) {
 		//Withdraw
 		shared_variable->balance = shared_variable->balance	- FirstElementVal(&(shared_variable->list));
 		printf("---PID: %d: W: First element value is deducted from balance. \n", getpid());
-		debug_print_shared(shared_variable);
-
-		struct Node * list_head = &(shared_variable->list);
+		
 		//Remove own request from the waiting list
-		DeleteFirstElement(list_head);
+		shared_variable->list = *(DeleteFirstElement(&(shared_variable->list)));
+
+		print_list(&shared_variable->list);
 
 		shared_variable->wcount = shared_variable->wcount - 1;
 
-		if (shared_variable->wcount > 1 && (FirstElementVal(&(shared_variable->list)) < shared_variable->balance)) {
+		if (shared_variable->wcount > 0 && (FirstElementVal(&(shared_variable->list)) < shared_variable->balance)) {
 			printf("---PID: %d: W: Signaling wlist. \n", getpid());
 			semaphore_signal(semid, SEMAPHORE_wlist);
 		}
 		//This signal() is paired with the depositing customer's wait(mutex)
 		else {
-			printf("---PID: %d: W: Signaling MUTEX. \n", getpid());
-			semaphore_signal(SEMAPHORE_MUTEX);
+			printf("---PID: %d: W: Signaling MUTEX. BYE FELICIA \n", getpid());
+			semaphore_signal(semid, SEMAPHORE_MUTEX);
 		}
 	}
 
@@ -339,6 +316,11 @@ struct Node * DeleteFirstElement(struct Node *A) {
 	printf("im in first line of delete yo \n");
 	print_list(A);
 	struct Node *temp = A;
+
+	if (A->next == NULL) {
+		A->data = 0;
+		return A;
+	}
 
 	A = A->next;
 	//free(temp);
