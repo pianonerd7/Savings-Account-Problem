@@ -1,38 +1,3 @@
-
-Conversation opened. 2 messages. 1 message unread.
-
-Skip to content
-Using Case Western Reserve University Mail with screen readers
-Jiaxin
-Click here to enable desktop notifications for Case Western Reserve University Mail.   Learn more  Hide
-1 of 14,057
- 
-(no subject)
-Inbox
-	x
-Jiaxin He	
-	Attachments11:19 AM (27 minutes ago)
-Jiaxin He <jxh604@case.edu>
-	
-Attachments11:46 AM (0 minutes ago)
-		
-to me
-On Wed, Oct 28, 2015 at 11:19 AM, Jiaxin He <jxh604@case.edu> wrote:
-Attachments area
-Preview attachment Savings_Account_Problem.c
-[C]
-	
-Click here to Reply or Forward
-Using 3.82 GB
-Manage
-Program Policies
-Powered by
-Google
-Last account activity: 0 minutes ago
-Currently being used in 1 other location  Details
-	
-	
-
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -67,7 +32,7 @@ struct Node {
 struct shared_variable_struct {
 	int wcount;
 	int balance;
-	struct Node *list;
+	struct Node list;
 };
 
 void fork_process(int deposit_or_withdraw, int amount);
