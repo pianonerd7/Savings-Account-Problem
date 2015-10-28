@@ -1,104 +1,92 @@
-pianonerd7@pianonerd7:~/Desktop/hw2$ ./hw4
-*** Hello world! I am 4350. 
-***PID: 4351: I am a WITHDRAW of amount 600! 
----PID: 4351: W: Waiting on Mutex.
----PID: 4351: W: Passed Mutex.
-	 Share Variable status at PID 4351: wcount = 1, balance = 500 
----PID: 4351: W: Signaling MUTEX. 
-***PID: 4352: I am a WITHDRAW of amount 300! 
----PID: 4352: W: Waiting on Mutex.
----PID: 4352: W: Passed Mutex.
-	 Share Variable status at PID 4352: wcount = 2, balance = 500 
----PID: 4352: W: Signaling MUTEX. 
-***PID: 4353: I am a WITHDRAW of amount 200! 
----PID: 4353: W: Waiting on Mutex.
----PID: 4353: W: Passed Mutex.
-	 Share Variable status at PID 4353: wcount = 3, balance = 500 
----PID: 4353: W: Signaling MUTEX. 
-***PID: 4354: I am a WITHDRAW of amount 200! 
----PID: 4354: W: Waiting on Mutex.
----PID: 4354: W: Passed Mutex.
-	 Share Variable status at PID 4354: wcount = 4, balance = 500 
----PID: 4354: W: Signaling MUTEX. 
-***PID: 4355: I am a DEPOSIT of amount 3000! 
----PID: 4355: D: Waiting on Mutex.
----PID: 4355: D: Passed Mutex.
----PID: 4355: D: An amount of 3000 has been added to the balance.
-	 Share Variable status at PID 4355: wcount = 4, balance = 3500 
----PID: 4355: D: Signaling wlist. 
----PID: 4351: W: Was waiting, now I'm signaled. 
----PID: 4351: W: First element value is deducted from balance. 
-	 Beginning of waiting withdraw list
-	 600
-	 End of waiting withdraw list 
----PID: 4351: W: Signaling wlist. 
----PID: 4351: W: End of withdraw! BYE! 
-	 Share Variable status at PID 4351: wcount = 3, balance = 2900 
----PID: 4352: W: Was waiting, now I'm signaled. 
----PID: 4352: W: First element value is deducted from balance. 
-	 Beginning of waiting withdraw list
-	 300
-	 End of waiting withdraw list 
----PID: 4352: W: Signaling wlist. 
----PID: 4352: W: End of withdraw! BYE! 
-	 Share Variable status at PID 4352: wcount = 2, balance = 2600 
----PID: 4353: W: Was waiting, now I'm signaled. 
----PID: 4353: W: First element value is deducted from balance. 
-	 Beginning of waiting withdraw list
-	 200
-	 End of waiting withdraw list 
----PID: 4353: W: Signaling wlist. 
----PID: 4353: W: End of withdraw! BYE! 
-	 Share Variable status at PID 4353: wcount = 1, balance = 2400 
----PID: 4354: W: Was waiting, now I'm signaled. 
----PID: 4354: W: First element value is deducted from balance. 
-	 Beginning of waiting withdraw list
-	 200
-	 End of waiting withdraw list 
----PID: 4354: W: Signaling MUTEX. 
----PID: 4354: W: End of withdraw! BYE! 
-	 Share Variable status at PID 4354: wcount = 0, balance = 2200 
----PID: 4355: D: End of deposit! BYE! 
-	 Share Variable status at PID 4355: wcount = 0, balance = 2200 
-***PID: 4357: I am a WITHDRAW of amount 400! 
----PID: 4357: W: Waiting on Mutex.
----PID: 4357: W: Passed Mutex.
----PID: 4357: W: An amount of 400 has been deducted from the balance.
-	 Share Variable status at PID 4357: wcount = 0, balance = 1800 
----PID: 4357: W: Signaling MUTEX. 
----PID: 4357: W: End of withdraw! BYE! 
-	 Share Variable status at PID 4357: wcount = 0, balance = 1800 
-***PID: 4358: I am a WITHDRAW of amount 700! 
----PID: 4358: W: Waiting on Mutex.
----PID: 4358: W: Passed Mutex.
----PID: 4358: W: An amount of 700 has been deducted from the balance.
-	 Share Variable status at PID 4358: wcount = 0, balance = 1100 
----PID: 4358: W: Signaling MUTEX. 
----PID: 4358: W: End of withdraw! BYE! 
-	 Share Variable status at PID 4358: wcount = 0, balance = 1100 
-***PID: 4359: I am a DEPOSIT of amount 300! 
----PID: 4359: D: Waiting on Mutex.
----PID: 4359: D: Passed Mutex.
----PID: 4359: D: An amount of 300 has been added to the balance.
-	 Share Variable status at PID 4359: wcount = 0, balance = 1400 
----PID: 4359: D: Signaling MUTEX. 
----PID: 4359: D: End of deposit! BYE! 
-	 Share Variable status at PID 4359: wcount = 0, balance = 1400 
-***PID: 4360: I am a WITHDRAW of amount 400! 
----PID: 4360: W: Waiting on Mutex.
----PID: 4360: W: Passed Mutex.
----PID: 4360: W: An amount of 400 has been deducted from the balance.
-	 Share Variable status at PID 4360: wcount = 0, balance = 1000 
----PID: 4360: W: Signaling MUTEX. 
----PID: 4360: W: End of withdraw! BYE! 
-	 Share Variable status at PID 4360: wcount = 0, balance = 1000 
-***PID: 4361: I am a DEPOSIT of amount 700! 
----PID: 4361: D: Waiting on Mutex.
----PID: 4361: D: Passed Mutex.
----PID: 4361: D: An amount of 700 has been added to the balance.
-	 Share Variable status at PID 4361: wcount = 0, balance = 1700 
----PID: 4361: D: Signaling MUTEX. 
----PID: 4361: D: End of deposit! BYE! 
-	 Share Variable status at PID 4361: wcount = 0, balance = 1700 
+pianonerd7@pianonerd7:~/Desktop/hw2$ ./Savings_Account_Problem 
+*** Hello world! I am 4606. 
+***PID: 4607: I am a WITHDRAW of amount 600! 
+---PID: 4607: W: Waiting on Mutex.
+---PID: 4607: W: Passed Mutex.
+	 Share Variable status at PID 4607: wcount = 1, balance = 500 
+---PID: 4607: W: Signaling MUTEX. 
+***PID: 4608: I am a WITHDRAW of amount 300! 
+---PID: 4608: W: Waiting on Mutex.
+---PID: 4608: W: Passed Mutex.
+	 Share Variable status at PID 4608: wcount = 2, balance = 500 
+---PID: 4608: W: Signaling MUTEX. 
+***PID: 4609: I am a WITHDRAW of amount 200! 
+---PID: 4609: W: Waiting on Mutex.
+---PID: 4609: W: Passed Mutex.
+	 Share Variable status at PID 4609: wcount = 3, balance = 500 
+---PID: 4609: W: Signaling MUTEX. 
+***PID: 4610: I am a WITHDRAW of amount 200! 
+---PID: 4610: W: Waiting on Mutex.
+---PID: 4610: W: Passed Mutex.
+	 Share Variable status at PID 4610: wcount = 4, balance = 500 
+---PID: 4610: W: Signaling MUTEX. 
+***PID: 4611: I am a DEPOSIT of amount 3000! 
+---PID: 4611: D: Waiting on Mutex.
+---PID: 4611: D: Passed Mutex.
+---PID: 4611: D: An amount of 3000 has been added to the balance.
+	 Share Variable status at PID 4611: wcount = 4, balance = 3500 
+---PID: 4611: D: Signaling wlist. 
+---PID: 4607: W: Was waiting, now I'm signaled. 
+---PID: 4607: W: First element value is deducted from balance. 
+---PID: 4607: W: Signaling wlist. 
+---PID: 4607: W: End of withdraw! BYE! 
+	 Share Variable status at PID 4607: wcount = 3, balance = 2900 
+---PID: 4608: W: Was waiting, now I'm signaled. 
+---PID: 4608: W: First element value is deducted from balance. 
+---PID: 4608: W: Signaling wlist. 
+---PID: 4608: W: End of withdraw! BYE! 
+	 Share Variable status at PID 4608: wcount = 2, balance = 2600 
+---PID: 4609: W: Was waiting, now I'm signaled. 
+---PID: 4609: W: First element value is deducted from balance. 
+---PID: 4609: W: Signaling wlist. 
+---PID: 4609: W: End of withdraw! BYE! 
+	 Share Variable status at PID 4609: wcount = 1, balance = 2400 
+---PID: 4610: W: Was waiting, now I'm signaled. 
+---PID: 4610: W: First element value is deducted from balance. 
+---PID: 4610: W: Signaling MUTEX. 
+---PID: 4610: W: End of withdraw! BYE! 
+	 Share Variable status at PID 4610: wcount = 0, balance = 2200 
+---PID: 4611: D: End of deposit! BYE! 
+	 Share Variable status at PID 4611: wcount = 0, balance = 2200 
+***PID: 4612: I am a WITHDRAW of amount 400! 
+---PID: 4612: W: Waiting on Mutex.
+---PID: 4612: W: Passed Mutex.
+---PID: 4612: W: An amount of 400 has been deducted from the balance.
+	 Share Variable status at PID 4612: wcount = 0, balance = 1800 
+---PID: 4612: W: Signaling MUTEX. 
+---PID: 4612: W: End of withdraw! BYE! 
+	 Share Variable status at PID 4612: wcount = 0, balance = 1800 
+***PID: 4613: I am a WITHDRAW of amount 700! 
+---PID: 4613: W: Waiting on Mutex.
+---PID: 4613: W: Passed Mutex.
+---PID: 4613: W: An amount of 700 has been deducted from the balance.
+	 Share Variable status at PID 4613: wcount = 0, balance = 1100 
+---PID: 4613: W: Signaling MUTEX. 
+---PID: 4613: W: End of withdraw! BYE! 
+	 Share Variable status at PID 4613: wcount = 0, balance = 1100 
+***PID: 4614: I am a DEPOSIT of amount 300! 
+---PID: 4614: D: Waiting on Mutex.
+---PID: 4614: D: Passed Mutex.
+---PID: 4614: D: An amount of 300 has been added to the balance.
+	 Share Variable status at PID 4614: wcount = 0, balance = 1400 
+---PID: 4614: D: Signaling MUTEX. 
+---PID: 4614: D: End of deposit! BYE! 
+	 Share Variable status at PID 4614: wcount = 0, balance = 1400 
+***PID: 4615: I am a WITHDRAW of amount 400! 
+---PID: 4615: W: Waiting on Mutex.
+---PID: 4615: W: Passed Mutex.
+---PID: 4615: W: An amount of 400 has been deducted from the balance.
+	 Share Variable status at PID 4615: wcount = 0, balance = 1000 
+---PID: 4615: W: Signaling MUTEX. 
+---PID: 4615: W: End of withdraw! BYE! 
+	 Share Variable status at PID 4615: wcount = 0, balance = 1000 
+***PID: 4616: I am a DEPOSIT of amount 700! 
+---PID: 4616: D: Waiting on Mutex.
+---PID: 4616: D: Passed Mutex.
+---PID: 4616: D: An amount of 700 has been added to the balance.
+	 Share Variable status at PID 4616: wcount = 0, balance = 1700 
+---PID: 4616: D: Signaling MUTEX. 
+---PID: 4616: D: End of deposit! BYE! 
+	 Share Variable status at PID 4616: wcount = 0, balance = 1700 
 pianonerd7@pianonerd7:~/Desktop/hw2$ 
 
