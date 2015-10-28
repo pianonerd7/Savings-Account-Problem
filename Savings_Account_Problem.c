@@ -42,8 +42,6 @@ void AddToEndOfList(struct Node *A, int val);
 struct Node * DeleteFirstElement(struct Node *A);
 int FirstElementVal(struct Node *A);
 
-void stall();
-
 void semaphore_wait();
 void semaphore_signal();
 int create_semaphore(int value);
@@ -81,14 +79,23 @@ void debug_print_shared(struct shared_variable_struct *shared) {
 	list = shared->list;
 
 	printf("\t Share Variable status at PID %d: wcount = %d, balance = %d \n", getpid(), wcount, balance);
-	print_list(list);
 }
 
-void stall() {
-	int i;
-	for(i = 0; i < 10000000; i++) {
-		;
-	}
+int Test_Mix_Deposit_Withdraw() {
+
+	int attribute_list[10] = {WITHDRAW, WITHDRAW, WITHDRAW, WITHDRAW, DEPOSIT, 
+		WITHDRAW, WITHDRAW, DEPOSIT, WITHDRAW, DEPOSIT};
+
+	int transaction_amount[10] = {600, 300, 200, 200, 3000, 400, 700, 300, 400, 700};
+
+	int index;
+
+	for (index = 0; index < 10; index++) {
+		fork_process(attribute_list[index], transaction_amount[index]);
+		sleep(4);
+	}						
+
+	return 10;
 }
 
 void main() {
@@ -120,48 +127,8 @@ void main() {
 	shared_variable->list = malloc(sizeof(struct Node));
 	struct Node *l = shared_variable->list;
 	l->data = 0;
-	//debug_print_shared(shared_variable);
-	//struct Node *test = shared_variable->list;
 
-/*
-	shared_variable->list = malloc(sizeof(struct Node));
-	struct Node *test = shared_variable->list;
-	printf("ADDING 1\n");
-	AddToEndOfList(test, 1);
-	sleep(4);
-		printf("ADDING 2\n");
-	AddToEndOfList(test, 2);
-	sleep(4);
-		printf("ADDING 3\n");
-	AddToEndOfList(test, 3);
-	//DeleteFirstElement(test);
-
-	debug_print_shared(shared_variable); */
-	int i = 5; 
-
-
-
-
-	fork_process(WITHDRAW, 600);
-	sleep(5);
-	fork_process(WITHDRAW, 300);
-	sleep(5);
-	fork_process(WITHDRAW, 200);
-	sleep(5);
-	fork_process(WITHDRAW, 200);
-	sleep(5);
-	fork_process(DEPOSIT, 3000);
-	sleep(5);
-	fork_process(WITHDRAW, 400);
-	stall();
-	fork_process(WITHDRAW, 700);
-	stall();
-	fork_process(DEPOSIT, 300);
-	stall();
-	fork_process(WITHDRAW, 400);
-	stall();
-	fork_process(DEPOSIT, 700);
-	stall();
+	int i = Test_Mix_Deposit_Withdraw(); 
 
 	//Wait until all the processes exit
 	int j;
@@ -247,14 +214,13 @@ void withdraw(int withdraw_amount) {
 	//Either other withdrawal requests are waiting or not enough balance
 	else {
 		shared_variable->wcount	= shared_variable->wcount + 1;
-		printf("GOT TO HERE1 \n\n\n");
+
 		AddToEndOfList(shared_variable->list, withdraw_amount);
-		printf("GOT TO HERE2 \n\n\n");
 		debug_print_shared(shared_variable);
 
-		printf("---PID: %d: W: Signaling MUTEX. HAHAHA \n", getpid());
+		printf("---PID: %d: W: Signaling MUTEX. \n", getpid());
 		semaphore_signal(semid, SEMAPHORE_MUTEX);
-		printf("SIGNALLED MUTEX \n");
+
 		//Wait for a deposit
 		semaphore_wait(semid, SEMAPHORE_wlist);
 		printf("---PID: %d: W: Was waiting, now I'm signaled. \n", getpid());
@@ -266,8 +232,6 @@ void withdraw(int withdraw_amount) {
 		//Remove own request from the waiting list
 		shared_variable->list = DeleteFirstElement(shared_variable->list);
 
-		print_list(shared_variable->list);
-
 		shared_variable->wcount = shared_variable->wcount - 1;
 
 		if (shared_variable->wcount > 0 && (FirstElementVal(shared_variable->list) < shared_variable->balance)) {
@@ -276,7 +240,7 @@ void withdraw(int withdraw_amount) {
 		}
 		//This signal() is paired with the depositing customer's wait(mutex)
 		else {
-			printf("---PID: %d: W: Signaling MUTEX. BYE FELICIA \n", getpid());
+			printf("---PID: %d: W: Signaling MUTEX. \n", getpid());
 			semaphore_signal(semid, SEMAPHORE_MUTEX);
 		}
 	}
@@ -318,10 +282,6 @@ void AddToEndOfList(struct Node *A, int val) {
 
 	if (A->data == 0) {
 		A->data = val;
-		printf("if head is 0");
-
-		printf("A\n");
-		print_list(A);
 		return;
 	}
 	struct Node *current = A;
@@ -333,15 +293,10 @@ void AddToEndOfList(struct Node *A, int val) {
 	current->next = malloc(sizeof(struct Node));
 	current->next->data = val;
 	current->next->next = NULL;
-
-	printf("\t\t\t in add to end of list\n");
-	print_list(A);
-	printf("\t\t\t ending add to end of list\n");
 }
 
 struct Node * DeleteFirstElement(struct Node *A) {
 
-	printf("im in first line of delete yo \n");
 	print_list(A);
 	struct Node *temp = A;
 
@@ -353,9 +308,6 @@ struct Node * DeleteFirstElement(struct Node *A) {
 	A = A->next;
 	free(temp);
 
-	printf("in delete\n");
-	print_list(A);
-	printf("ending delete\n");
 	return A;
 }
 
